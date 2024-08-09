@@ -1,0 +1,42 @@
+[project]
+name = "cereggii-benchmarks"
+version = "0.1.0"
+description = "Benchmarking cereggii"
+readme = "README.md"
+requires-python = "~=3.9"
+license = { file = "LICENSE" }
+authors = [
+  { name = "dpdani", email = "git@danieleparmeggiani.me" },
+]
+keywords = [
+  "multithreading",
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Operating System :: OS Independent",
+  "Natural Language :: English",
+]
+dependencies = [
+  "cereggii==0.2.1",
+  "numpy==1.24.0",
+  "nltk==3.8.1",
+  "typer==0.12.3",
+  "humanize==4.10.0",
+  "matplotlib==3.6.2",
+  "pydantic==2.5.3",
+]
+
+
+[tool.setuptools.packages.find]
+exclude = ["reports"]
+
+
+[project.urls]
+Documentation = "https://github.com/dpdani/cereggii#readme"
+Issues = "https://github.com/dpdani/cereggii/issues"
+Source = "https://github.com/dpdani/cereggii"
