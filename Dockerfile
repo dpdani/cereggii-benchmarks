@@ -73,7 +73,13 @@ RUN cd /usr/local/bin \
 COPY --from=builder /cereggii-benchmarks/growt/build /cereggii-benchmarks/growt/build
 COPY --from=builder /cereggii-benchmarks/hw-perf/build /cereggii-benchmarks/hw-perf/build
 
-RUN apt-get update -qq && apt-get install -yqq linux-perf strace time
+RUN apt-get update -qq && apt-get install -yqq linux-perf strace time poppler-utils
+
+RUN wget -qO- "https://yihui.org/tinytex/install-bin-unix.sh" | sh
+
+ENV PATH=$PATH:/root/bin
+
+RUN tlmgr install underscore pgf
 
 WORKDIR /cereggii-benchmarks
 
