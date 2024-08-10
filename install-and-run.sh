@@ -14,4 +14,5 @@ mkdir -p ./reports
 docker run \
   --cap-add PERFMON --cap-add SYS_PTRACE \
   -v ./reports:/cereggii-benchmarks/reports \
+  --env PYTHONUNBUFFERED=1 \
   'cereggii_benchmarks'
