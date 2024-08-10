@@ -11,6 +11,7 @@ git submodule update --init utils
 cd ..
 docker build --tag 'cereggii_benchmarks' .
 mkdir -p ./reports
-docker run 'cereggii_benchmarks' \
+docker run \
   --cap-add PERFMON --cap-add SYS_PTRACE \
-  -v ./reports:/cereggii-benchmarks/reports
+  -v ./reports:/cereggii-benchmarks/reports \
+  'cereggii_benchmarks'
