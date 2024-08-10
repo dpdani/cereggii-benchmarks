@@ -39,11 +39,12 @@ def run_hardware_benchmarks(reports_dir: Path):
         print(f"    - {command}")
         out = subprocess.check_output(command, cwd=config["hw_perf_dir"], shell=True, stderr=subprocess.STDOUT)
 
-        results[cas] = amount / float(pattern.search(out.decode()).groups()[0])
+        results[cas] = amount / float(pattern.search(out.decode()).groups()[0]) / 1_000_000
 
-    command = "./build/cache"
-    print(f"    - {command}")
-    cache = subprocess.check_output(command, cwd=config["hw_perf_dir"]).decode()
+    # command = "./build/cache"
+    # print(f"    - {command}")
+    # cache = subprocess.check_output(command, cwd=config["hw_perf_dir"]).decode()
+    cache = ""
 
     took = time.time() - started
     click.secho(f"    hardware benchmarks completed in {humanize.naturaldelta(took)}", fg="green")
