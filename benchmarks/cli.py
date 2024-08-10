@@ -1,6 +1,7 @@
 import multiprocessing
 import shutil
 import subprocess
+import sys
 import time
 import timeit
 from collections import Counter, OrderedDict
@@ -13,6 +14,7 @@ from cereggii import AtomicDict, AtomicInt
 
 from . import __doc__ as doc, benches, utils
 from .growt import Growt
+from .hw_perf import run_hardware_benchmarks
 
 
 app = typer.Typer()
@@ -58,7 +60,9 @@ def run_benchmark(benchmark: str, arguments: str, repeats=5):
 
 @app.command()
 def start():
-    print(doc.lstrip())
+    click.secho(doc.lstrip(), bold=True)
+
+    print(f"{sys.version=}\n")
 
     print("Initializing perf... ", end='')
     subprocess.check_call("perf record -q -o /dev/null sleep 1", shell=True)
@@ -72,6 +76,8 @@ def start():
     print(f"Will write reports to {utils.reports_dir}.\n\nRunning benchmarks:")
 
     started = time.time()
+
+    run_hardware_benchmarks(utils.reports_dir)
 
     for t in utils.threads():
         run_benchmark('book', f'AtomicDict, threads={t}')
@@ -138,7 +144,7 @@ def start():
     run_benchmark('batch_lookup', f"Growt, threads={cpu_count}, batch_size={0}")
 
     took = time.time() - started
-    click.secho(f"\nBenchmarks completed in {humanize.naturaldelta(took)}.\n", fg='green')
+    click.secho(f"\nBenchmarks completed in {humanize.naturaldelta(took)}.\n", fg='green', bold=True)
 
     print("Preparing binaries and shared libraries for perf inspections... ", end='')
     prepare_shared()

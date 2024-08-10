@@ -9,7 +9,7 @@ class Growt:
     assert installation_dir.is_dir()
 
     def run_command(self, command: str, wall_clock_time_col_name: str) -> float:
-        command = f"./{self.installation_dir}/build/{command}"
+        command = f"./build/{command}"
         print(f"    - {command}")
         p = subprocess.Popen(
             command,

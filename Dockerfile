@@ -1,8 +1,24 @@
 # (mostly) Copied from https://github.com/docker-library/python/blob/master/3.9/bullseye/Dockerfile
 
-FROM buildpack-deps:trixie
+FROM buildpack-deps:trixie AS builder
 
-ENV commit=7bb129aa92c595f34202e82bae5d437e003cb3ff
+COPY growt /cereggii-benchmarks/growt
+
+RUN apt-get update && apt-get install -yqq cmake
+
+RUN cd /cereggii-benchmarks/growt \
+        && mkdir build \
+        && cd build \
+        && cmake .. \
+        && make -j
+
+COPY hw-perf /cereggii-benchmarks/hw-perf
+
+RUN cd /cereggii-benchmarks/hw-perf \
+    && mkdir "build" \
+    && BUILD_DIR=/cereggii-benchmarks/hw-perf/build make build-all
+
+FROM buildpack-deps:trixie
 
 # ensure local python is preferred over distribution python
 ENV PATH=/usr/local/bin:$PATH
@@ -18,12 +34,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 		uuid-dev \
 	&& rm -rf /var/lib/apt/lists/*
 
+COPY ./cpython /usr/src/python
+
 RUN set -ex \
-	\
-	&& wget -O python.tar.gz "https://github.com/colesbury/nogil/tarball/$commit" \
-	&& mkdir -p /usr/src/python \
-	&& tar -xC /usr/src/python --strip-components=1 -f python.tar.gz \
-	&& rm python.tar.gz \
 	\
 	&& cd /usr/src/python \
 	&& gnuArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)" \
@@ -57,8 +70,10 @@ RUN cd /usr/local/bin \
 	&& ln -s python3-config python-config \
 	&& ln -s pip3 pip
 
+COPY --from=builder /cereggii-benchmarks/growt/build /cereggii-benchmarks/growt/build
+COPY --from=builder /cereggii-benchmarks/hw-perf/build /cereggii-benchmarks/hw-perf/build
 
-RUN apt-get update -qq && apt-get install -yqq linux-perf strace
+RUN apt-get update -qq && apt-get install -yqq linux-perf strace time
 
 WORKDIR /cereggii-benchmarks
 
