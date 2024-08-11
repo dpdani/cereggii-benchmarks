@@ -116,10 +116,10 @@ def start():
         run_benchmark('update_contention', f"AtomicDict, skew={s}, threads={cpu_count}")
         run_benchmark('update_contention', f"Growt, skew={s}, threads={cpu_count}")
         run_benchmark('aggregation', f"Counter, skew={s}, threads=1")
-        run_benchmark('aggregation', f"AtomicDict, skew={s}, threads={cpu_count}")
         run_benchmark('aggregation', f"Growt, skew={s}, threads={cpu_count}")
-        run_benchmark('aggregation', f"AtomicDict, skew={s}, threads={cpu_count}, min_size=10_000_000")
         run_benchmark('aggregation', f"Growt, skew={s}, threads={cpu_count}, min_size=10_000_000")
+        run_benchmark('aggregation', f"AtomicDict, skew={s}, threads={cpu_count}, reduce=True")
+        run_benchmark('aggregation', f"AtomicDict, skew={s}, threads={cpu_count}, min_size=10_000_000, reduce=True")
 
     win = 8192
     for wp in [0.05, 0.10, 0.25, 0.50, 0.75]:

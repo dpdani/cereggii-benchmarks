@@ -15,7 +15,7 @@ from ..utils import Axes, PerformanceReport
 keys_count = 10_000_000
 
 
-def aggregation(dict_factory, skew, threads, min_size=0):
+def aggregation(dict_factory, skew, threads, min_size=0, reduce=False):
     params = {"dict_factory": dict_factory.__qualname__,
               "keys_count": keys_count,
               "skew": skew,
@@ -67,6 +67,16 @@ def aggregation(dict_factory, skew, threads, min_size=0):
                 else:
                     break
 
+    def atomic_reduce(i, keys):
+        def count(key, current, new):
+            if current is cereggii.NOT_FOUND:
+                return 1
+            return current + new
+
+        b1.wait()
+        b2.wait()
+        d.reduce(zip(keys, itertools.repeat(1)), count)
+
     def builtin(i, keys):
         b1.wait()
         b2.wait()
@@ -76,8 +86,14 @@ def aggregation(dict_factory, skew, threads, min_size=0):
     thrds = []
     batched = utils.batched(keys, threads)
     for i, batch in enumerate(batched):
-        t = threading.Thread(target=atomic if dict_factory == cereggii.AtomicDict else builtin,
-                             args=(i, batch))
+        if dict_factory == cereggii.AtomicDict:
+            if reduce:
+                target = atomic_reduce
+            else:
+                target = atomic
+        else:
+            target = builtin
+        t = threading.Thread(target=target, args=(i, batch))
         thrds.append(t)
 
     assert len(thrds) == threads
@@ -195,6 +211,40 @@ def generate_report(reports_dir: Path) -> PerformanceReport:
         reports_dir,
         name="aggregation",
         filter_re=re.compile(r"((Counter, .*)|((AtomicDict|Growt), (.*), min_size=10_000_000))"),
+    )
+
+
+def generate_report_reduce(reports_dir: Path) -> PerformanceReport:
+    return utils.make_report(
+        reports_dir,
+        bm_dir_name="aggregation",
+        filter_re=re.compile(r"AtomicDict, (.*), reduce=True"),
+        sort_reports_by_param="skew",
+        reporter=lambda reports: (
+            PerformanceReport(
+                name="aggregation_reduce",
+                dims=[
+                    [Axes.skew],
+                    [Axes.throughput, Axes.absolute_speedup],
+                ],
+                data={
+                    "AtomicDict": {
+                        "skew": list(map(lambda report: report.params["skew"], reports["AtomicDict"])),
+                        "throughput": [
+                            utils.throughput_AtomicDict(report)
+                            for report in reports["AtomicDict"]
+                        ],
+                        "absolute speedup": [
+                            utils.absolute_speedup_AtomicDict(report, reports["AtomicDict"][0])
+                            for report in reports["AtomicDict"]
+                        ],
+                    },
+                },
+                benchmark_reports={
+                    "AtomicDict": reports["AtomicDict"],
+                },
+            )
+        ),
     )
 
 

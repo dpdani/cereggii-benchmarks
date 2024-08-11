@@ -22,6 +22,7 @@ def generate_reports(reports_dir: Path) -> PerformanceReportSuite:
     reports = [
         benches.aggregation.generate_report(reports_dir),
         benches.aggregation.generate_report_growing(reports_dir),
+        benches.aggregation.generate_report_reduce(reports_dir),
         benches.book.generate_report(reports_dir),
         benches.batch_lookup.generate_report(reports_dir),
         benches.delete.generate_report(reports_dir),
